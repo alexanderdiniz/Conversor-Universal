@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Universal Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        /* Esconde a barra de rolagem mas permite rolar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center p-4 text-slate-800">
+
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-700">
+        
+        <!-- Cabeçalho -->
+        <div class="bg-indigo-600 p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold">Conversor Multi</h1>
+                    <p class="text-indigo-200 text-xs mt-1">7 Categorias • 50+ Unidades</p>
+                </div>
+                <!-- Ícone decorativo -->
+                <div class="bg-indigo-500 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu de Categorias (Scroll Horizontal) -->
+        <div class="bg-indigo-50 border-b border-indigo-100 overflow-x-auto no-scrollbar">
+            <div class="flex p-2 gap-2 min-w-max" id="category-container">
+                <!-- Botões gerados via JS -->
+            </div>
+        </div>
+
+        <!-- Área Principal -->
+        <div class="p-6 space-y-8">
+            
+            <!-- Input Principal -->
+            <div class="relative">
+                <label class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-semibold text-indigo-600">Valor</label>
+                <input
+                    type="number"
+                    id="amount-input"
+                    value="1"
+                    oninput="calculate()"
+                    class="w-full text-4xl font-bold text-slate-800 border-2 border-indigo-100 rounded-xl px-4 py-3 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all placeholder-slate-200"
+                    placeholder="0"
+                />
+            </div>
+
+            <!-- Conversão (De -> Para) -->
+            <div class="grid grid-cols-[1fr,auto,1fr] gap-3 items-center">
+                
+                <!-- Lado Esquerdo -->
+                <div class="space-y-1">
+                    <label class="text-xs font-medium text-slate-500 ml-1">De:</label>
+                    <select id="from-unit" onchange="calculate()" class="w-full p-3 bg-slate-50 rounded-xl border-r-8 border-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors">
+                        <!-- Opções -->
+                    </select>
+                </div>
+
+                <!-- Botão Trocar -->
+                <button onclick="swapUnits()" class="p-3 bg-white border border-slate-200 text-indigo-600 rounded-full shadow-sm hover:shadow-md hover:scale-105 hover:bg-indigo-50 active:scale-95 transition-all z-10" title="Inverter">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/></svg>
+                </button>
+
+                <!-- Lado Direito -->
+                <div class="space-y-1">
+                    <label class="text-xs font-medium text-slate-500 ml-1">Para:</label>
+                    <select id="to-unit" onchange="calculate()" class="w-full p-3 bg-indigo-50/50 rounded-xl border-r-8 border-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer hover:bg-indigo-100 transition-colors">
+                        <!-- Opções -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Resultado -->
+            <div class="bg-slate-900 rounded-2xl p-6 text-center text-white shadow-xl relative overflow-hidden group">
+                <!-- Efeito de fundo -->
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500 rounded-full opacity-20 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="absolute -left-6 -bottom-6 w-20 h-20 bg-purple-500 rounded-full opacity-20 group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <p class="text-indigo-200 text-xs uppercase tracking-widest font-bold mb-2 relative z-10">Resultado Final</p>
+                <div class="relative z-10 break-words">
+                    <span id="result-value" class="text-3xl sm:text-4xl font-bold tracking-tight">---</span>
+                    <div id="result-unit" class="text-sm sm:text-base text-slate-400 mt-1 font-medium">---</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Rodapé -->
+        <div class="bg-slate-50 p-3 text-center border-t border-slate-200">
+           <button onclick="resetApp()" class="text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors py-2 px-4 rounded-full hover:bg-indigo-50">
+             Limpar Tudo
+           </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DADOS E LÓGICA ---
+        
+        // Definição completa das unidades e ícones
+        const categories = {
+            length: {
+                label: 'Medidas',
+                icon: '<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>',
+                units: [
+                    { id: 'm', label: 'Metros (m)', factor: 1 },
+                    { id: 'km', label: 'Quilômetros (km)', factor: 1000 },
+                    { id: 'cm', label: 'Centímetros (cm)', factor: 0.01 },
+                    { id: 'mm', label: 'Milímetros (mm)', factor: 0.001 },
+                    { id: 'ft', label: 'Pés (ft)', factor: 0.3048 },
+                    { id: 'in', label: 'Polegadas (in)', factor: 0.0254 },
+                    { id: 'mi', label: 'Milhas (mi)', factor: 1609.34 },
+                    { id: 'yd', label: 'Jardas (yd)', factor: 0.9144 }
+                ],
+                defaults: ['m', 'km']
+            },
+            weight: {
+                label: 'Peso',
+                icon: '<circle cx="12" cy="5" r="3"/><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"/>',
+                units: [
+                    { id: 'kg', label: 'Quilogramas (kg)', factor: 1 },
+                    { id: 'g', label: 'Gramas (g)', factor: 0.001 },
+                    { id: 'mg', label: 'Miligramas (mg)', factor: 0.000001 },
+                    { id: 't', label: 'Toneladas (t)', factor: 1000 },
+                    { id: 'lb', label: 'Libras (lb)', factor: 0.453592 },
+                    { id: 'oz', label: 'Onças (oz)', factor: 0.0283495 }
+                ],
+                defaults: ['kg', 'lb']
+            },
+            temperature: {
+                label: 'Temp.',
+                icon: '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+                units: [
+                    { id: 'c', label: 'Celsius (°C)' },
+                    { id: 'f', label: 'Fahrenheit (°F)' },
+                    { id: 'k', label: 'Kelvin (K)' }
+                ],
+                defaults: ['c', 'f']
+            },
+            volume: {
+                label: 'Volume',
+                icon: '<path d="M12 2.69l5.74 5.88a1 1 0 0 1 .23.97l-2.09 9a2 2 0 0 1-1.94 1.46H10a2 2 0 0 1-1.94-1.46l-2.09-9a1 1 0 0 1 .23-.97L12 2.69z"/><path d="m9.5 7.5 5 5"/>',
+                units: [
+                    { id: 'l', label: 'Litros (L)', factor: 1 },
+                    { id: 'ml', label: 'Mililitros (ml)', factor: 0.001 },
+                    { id: 'gal', label: 'Galões EUA (gal)', factor: 3.78541 },
+                    { id: 'cup', label: 'Xícaras (cup)', factor: 0.24 },
+                    { id: 'fl_oz', label: 'Onças Líq. (fl oz)', factor: 0.0295735 }
+                ],
+                defaults: ['l', 'ml']
+            },
+            area: {
+                label: 'Área',
+                icon: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
+                units: [
+                    { id: 'm2', label: 'Metros Quad. (m²)', factor: 1 },
+                    { id: 'ha', label: 'Hectares (ha)', factor: 10000 },
+                    { id: 'km2', label: 'Km Quadrados (km²)', factor: 1000000 },
+                    { id: 'acre', label: 'Acres (ac)', factor: 4046.86 },
+                    { id: 'ft2', label: 'Pés Quad. (ft²)', factor: 0.092903 }
+                ],
+                defaults: ['m2', 'ha']
+            },
+            time: {
+                label: 'Tempo',
+                icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+                units: [
+                    { id: 's', label: 'Segundos (s)', factor: 1 },
+                    { id: 'min', label: 'Minutos (min)', factor: 60 },
+                    { id: 'h', label: 'Horas (h)', factor: 3600 },
+                    { id: 'd', label: 'Dias (d)', factor: 86400 },
+                    { id: 'wk', label: 'Semanas', factor: 604800 },
+                    { id: 'mo', label: 'Meses (30d)', factor: 2592000 },
+                    { id: 'y', label: 'Anos (365d)', factor: 31536000 }
+                ],
+                defaults: ['h', 'min']
+            },
+            data: {
+                label: 'Dados',
+                icon: '<path d="M4 14a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2"/><path d="M12 14v7"/><path d="M8 21h8"/>',
+                units: [
+                    { id: 'b', label: 'Bytes (B)', factor: 1 },
+                    { id: 'kb', label: 'Kilobytes (KB)', factor: 1024 },
+                    { id: 'mb', label: 'Megabytes (MB)', factor: 1048576 },
+                    { id: 'gb', label: 'Gigabytes (GB)', factor: 1073741824 },
+                    { id: 'tb', label: 'Terabytes (TB)', factor: 1099511627776 }
+                ],
+                defaults: ['mb', 'gb']
+            }
+        };
+
+        let currentCategory = 'length';
+
+        // Elementos
+        const els = {
+            amount: document.getElementById('amount-input'),
+            from: document.getElementById('from-unit'),
+            to: document.getElementById('to-unit'),
+            result: document.getElementById('result-value'),
+            resultUnit: document.getElementById('result-unit'),
+            catContainer: document.getElementById('category-container')
+        };
+
+        // --- FUNÇÕES ---
+
+        function init() {
+            renderCategories();
+            setCategory('length'); // Começa com comprimento
+        }
+
+        // Renderiza os botões de categoria dinamicamente
+        function renderCategories() {
+            els.catContainer.innerHTML = Object.keys(categories).map(key => {
+                const cat = categories[key];
+                return `
+                    <button onclick="setCategory('${key}')" id="btn-${key}" 
+                        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all min-w-[80px] border border-transparent hover:bg-white/50 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            ${cat.icon}
+                        </svg>
+                        <span class="text-xs font-semibold whitespace-nowrap">${cat.label}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setCategory(key) {
+            currentCategory = key;
+            const catData = categories[key];
+
+            // Atualiza estilo dos botões
+            document.querySelectorAll('#category-container button').forEach(btn => {
+                btn.className = "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all min-w-[80px] border border-transparent text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50";
+            });
+            
+            const activeBtn = document.getElementById(`btn-${key}`);
+            if(activeBtn) {
+                activeBtn.className = "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all min-w-[80px] bg-white text-indigo-600 shadow-sm border-indigo-100 ring-2 ring-indigo-50";
+            }
+
+            // Popula os selects
+            const options = catData.units.map(u => `<option value="${u.id}">${u.label}</option>`).join('');
+            els.from.innerHTML = options;
+            els.to.innerHTML = options;
+
+            // Define valores padrão para não ficar repetido
+            els.from.value = catData.defaults[0];
+            els.to.value = catData.defaults[1];
+
+            calculate();
+        }
+
+        function calculate() {
+            const val = parseFloat(els.amount.value);
+            const fromId = els.from.value;
+            const toId = els.to.value;
+            
+            if (isNaN(val)) {
+                els.result.textContent = '---';
+                els.resultUnit.textContent = 'Digite um número';
+                return;
+            }
+
+            let result = 0;
+
+            // Lógica Especial para Temperatura
+            if (currentCategory === 'temperature') {
+                if (fromId === toId) result = val;
+                else if (fromId === 'c' && toId === 'f') result = (val * 9/5) + 32;
+                else if (fromId === 'c' && toId === 'k') result = val + 273.15;
+                else if (fromId === 'f' && toId === 'c') result = (val - 32) * 5/9;
+                else if (fromId === 'f' && toId === 'k') result = (val - 32) * 5/9 + 273.15;
+                else if (fromId === 'k' && toId === 'c') result = val - 273.15;
+                else if (fromId === 'k' && toId === 'f') result = (val - 273.15) * 9/5 + 32;
+            } 
+            // Lógica Padrão (baseada em Fator de Conversão)
+            else {
+                const units = categories[currentCategory].units;
+                const fromFactor = units.find(u => u.id === fromId)?.factor || 1;
+                const toFactor = units.find(u => u.id === toId)?.factor || 1;
+                
+                // Converte para base (ex: metros) -> converte para destino
+                const baseValue = val * fromFactor;
+                result = baseValue / toFactor;
+            }
+
+            // Formatação Bonita (Remove muitos decimais, usa notação se muito grande)
+            let displayResult = result;
+            if (Math.abs(result) < 0.0001 || Math.abs(result) > 1000000) {
+                displayResult = result.toExponential(4);
+            } else {
+                displayResult = parseFloat(result.toFixed(4));
+            }
+
+            els.result.textContent = displayResult;
+            
+            // Texto da unidade de destino
+            const unitLabel = categories[currentCategory].units.find(u => u.id === toId)?.label;
+            els.resultUnit.textContent = unitLabel || '';
+        }
+
+        function swapUnits() {
+            const temp = els.from.value;
+            els.from.value = els.to.value;
+            els.to.value = temp;
+            calculate();
+        }
+
+        function resetApp() {
+            els.amount.value = 1;
+            setCategory('length');
+        }
+
+        // Inicia
+        init();
+
+    </script>
+</body>
+</html>
